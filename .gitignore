@@ -1,0 +1,5 @@
+.millennium/lsp/
+.millennium/sourcemaps/
+.millennium/types/
+node_modules/
+*.star

@@ -81,18 +81,15 @@ function installNavigationButton(steamDocument: Document): Element | null {
   if (!storeItem && navigation.children.length >= 3) storeItem = navigation.children.item(2);
   if (!storeItem) return navigation;
 
-  if (!navigation.hasAttribute("data-arkona-navigation-reset-bound")) {
-    navigation.addEventListener("click", (event) => {
-      const target = event.target as { closest?: (selector: string) => Element | null } | null;
-      if (!target?.closest?.(`[${NAV_ATTRIBUTE}]`)) setNavigationActive(false);
-    }, true);
-    navigation.setAttribute("data-arkona-navigation-reset-bound", "true");
-  }
-
   const existingButtons = Array.from(steamDocument.querySelectorAll<HTMLElement>(`[${NAV_ATTRIBUTE}]`));
   const item = existingButtons.shift() || steamDocument.createElement("div");
   existingButtons.forEach((duplicate) => duplicate.remove());
-  item.className = superNavClasses?.SuperNavMenu || storeItem.className || "";
+  const neutralItem = Array.from(navigation.children).find((child) =>
+    !child.hasAttribute(NAV_ATTRIBUTE)
+    && child.classList.contains("SuperNavMenu")
+    && !child.classList.contains("Selected")
+  );
+  item.className = neutralItem?.className || superNavClasses?.SuperNavMenu || storeItem.className || "";
   item.removeAttribute("style");
   item.setAttribute(NAV_ATTRIBUTE, "true");
   item.setAttribute("role", "button");

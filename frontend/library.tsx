@@ -9,6 +9,7 @@ type AdvancedFilters = {
   platform: string;
   genre: string;
   steam: string;
+  multiplayer: string;
   date_min: string;
   date_max: string;
 };
@@ -55,6 +56,7 @@ const EMPTY_FILTERS: AdvancedFilters = {
   platform: "",
   genre: "",
   steam: "",
+  multiplayer: "",
   date_min: "",
   date_max: "",
 };
@@ -81,6 +83,7 @@ type LibraryCopy = {
   library: string;
   loading: string;
   metadataUnavailable: string;
+  multiplayer: string;
   mostReleases: string;
   next: string;
   no: string;
@@ -106,7 +109,7 @@ const libraryCopy: Record<LibraryLanguage, LibraryCopy> = {
     advancedFilters: "Advanced filters", advancedSearch: "Advanced search", all: "All", apply: "Apply", clearSearch: "Clear search",
     dateFrom: "Game releases date from", dateTo: "Game releases date to", games: "games", genre: "Genre",
     intro: "Browse games and their available Arkona releases.", library: "Library", loading: "Loading…",
-    metadataUnavailable: "Detailed metadata unavailable.", mostReleases: "Most releases", next: "Next", no: "No", noGames: "No games found.",
+    metadataUnavailable: "Detailed metadata unavailable.", multiplayer: "Multiplayer (Online-Fix)", mostReleases: "Most releases", next: "Next", no: "No", noGames: "No games found.",
     platforms: "Platforms", previous: "Previous", recentlyAdded: "Recently added", release: "release", releases: "releases",
     reset: "Reset", retry: "Retry", search: "Search", searchGames: "Search games", sortGames: "Sort games", title: "Title",
     topRated: "Top rated", unavailable: "The Arkona library is temporarily unavailable.", yes: "Yes",
@@ -115,7 +118,7 @@ const libraryCopy: Record<LibraryLanguage, LibraryCopy> = {
     advancedFilters: "Filtres avancés", advancedSearch: "Recherche avancée", all: "Tous", apply: "Appliquer", clearSearch: "Effacer la recherche",
     dateFrom: "Date des releases - du", dateTo: "Date des releases - au", games: "jeux", genre: "Genre",
     intro: "Parcourez les jeux et leurs releases disponibles sur Arkona.", library: "Bibliothèque", loading: "Chargement…",
-    metadataUnavailable: "Métadonnées détaillées indisponibles.", mostReleases: "Plus de releases", next: "Suivant", no: "Non", noGames: "Aucun jeu trouvé.",
+    metadataUnavailable: "Métadonnées détaillées indisponibles.", multiplayer: "Multijoueur (Online-Fix)", mostReleases: "Plus de releases", next: "Suivant", no: "Non", noGames: "Aucun jeu trouvé.",
     platforms: "Plateformes", previous: "Précédent", recentlyAdded: "Ajouts récents", release: "release", releases: "releases",
     reset: "Réinitialiser", retry: "Réessayer", search: "Rechercher", searchGames: "Rechercher un jeu", sortGames: "Trier les jeux", title: "Titre",
     topRated: "Mieux notés", unavailable: "La bibliothèque Arkona est temporairement indisponible.", yes: "Oui",
@@ -124,7 +127,7 @@ const libraryCopy: Record<LibraryLanguage, LibraryCopy> = {
     advancedFilters: "Расширенные фильтры", advancedSearch: "Расширенный поиск", all: "Все", apply: "Применить", clearSearch: "Очистить поиск",
     dateFrom: "Дата релиза игры от", dateTo: "Дата релиза игры до", games: "игр", genre: "Жанр",
     intro: "Просматривайте игры и доступные релизы Arkona.", library: "Библиотека", loading: "Загрузка…",
-    metadataUnavailable: "Подробные метаданные недоступны.", mostReleases: "Больше релизов", next: "Далее", no: "Нет", noGames: "Игры не найдены.",
+    metadataUnavailable: "Подробные метаданные недоступны.", multiplayer: "Сетевая игра (Online-Fix)", mostReleases: "Больше релизов", next: "Далее", no: "Нет", noGames: "Игры не найдены.",
     platforms: "Платформы", previous: "Назад", recentlyAdded: "Недавно добавленные", release: "релиз", releases: "релизов",
     reset: "Сбросить", retry: "Повторить", search: "Найти", searchGames: "Поиск игр", sortGames: "Сортировка игр", title: "Название",
     topRated: "Лучшие оценки", unavailable: "Библиотека Arkona временно недоступна.", yes: "Да",
@@ -342,6 +345,9 @@ export function ArkonaLibraryPage() {
               ]} />
               <label className="arkona-text-control"><span className="arkona-control-label">{copy.genre}</span><input value={draftFilters.genre} onChange={(event) => updateDraftFilter("genre", event.currentTarget.value)} placeholder="Action, RPG…" /></label>
               <ArkonaSelect label="Steam" value={draftFilters.steam} onChange={(value) => updateDraftFilter("steam", value)} options={[
+                { value: "", label: copy.all }, { value: "yes", label: copy.yes }, { value: "no", label: copy.no },
+              ]} />
+              <ArkonaSelect label={copy.multiplayer} value={draftFilters.multiplayer} onChange={(value) => updateDraftFilter("multiplayer", value)} options={[
                 { value: "", label: copy.all }, { value: "yes", label: copy.yes }, { value: "no", label: copy.no },
               ]} />
               <label className="arkona-text-control"><span className="arkona-control-label">{copy.dateFrom}</span><input type="date" value={draftFilters.date_min} onChange={(event) => updateDraftFilter("date_min", event.currentTarget.value)} style={{ colorScheme: "dark" }} /></label>

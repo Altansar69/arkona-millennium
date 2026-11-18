@@ -200,6 +200,7 @@ function FetchArkonaGames(query, page, sort, filters)
         scene_reference = { yes = true, no = true },
         metadata = { yes = true, no = true, igdb = true, steam = true },
         steam = { yes = true, no = true },
+        multiplayer = { yes = true, no = true },
         cover = { yes = true, no = true }
     }
     local query_filters = {}

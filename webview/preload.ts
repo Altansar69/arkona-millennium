@@ -12,7 +12,7 @@ import {
   parseRpcResponse,
   releaseUrl,
 } from "./model";
-import { copyForLanguage, interpolate, type Copy } from "./localization";
+import { copyForLanguage, detectLanguage, interpolate, type Copy } from "./localization";
 import { solveAltcha, solveSessionProof, type AltchaChallenge } from "./security";
 
 const LOG = "[Arkona]";
@@ -22,7 +22,7 @@ const STYLE_ID = "arkona-releases-styles";
 const STORE_APP = /store\.steampowered\.com\/app\/(\d+)/;
 
 function copy(): Copy {
-  return copyForLanguage(document.documentElement.lang || navigator.language || "en");
+  return copyForLanguage(detectLanguage());
 }
 
 function external(url: string): string {
@@ -365,7 +365,7 @@ function headerLink(item: ArkonaGameLink): HTMLAnchorElement {
   const icon = element("img", "ico16") as HTMLImageElement;
   icon.src = iconFor(item);
   icon.alt = "";
-  icon.style.cssText = "width:22px;height:22px;object-fit:contain;vertical-align:middle;background:none";
+  icon.style.cssText = "width:20px;height:20px;object-fit:contain;background:none";
   icon.addEventListener("error", () => {
     const fallback = directFavicon(item);
     if (fallback && icon.dataset.fallback !== "direct") {
@@ -462,6 +462,7 @@ async function insertHeaderLinks(links: ArkonaGameLink[]): Promise<void> {
   const layout = () => {
     syncDuplicates();
     overflow.replaceChildren();
+    for (const button of buttons) button.style.marginRight = "0.28em";
     primary.replaceChildren(...buttons);
     toggle.hidden = true;
     root.classList.remove("arkona-expanded");
@@ -487,7 +488,12 @@ async function insertHeaderLinks(links: ArkonaGameLink[]): Promise<void> {
     }
     if (keep >= visible.length) return;
     toggle.hidden = false;
-    for (const button of visible.slice(keep)) overflow.append(button);
+    const hidden = visible.slice(keep);
+    overflow.style.setProperty("--arkona-columns", String(Math.min(hidden.length, 6)));
+    for (const button of hidden) {
+      button.style.marginRight = "0";
+      overflow.append(button);
+    }
   };
   const setExpanded = (expanded: boolean) => {
     root.classList.toggle("arkona-expanded", expanded);
@@ -531,15 +537,15 @@ function addStyles(): void {
 .arkona-heading { align-items: center; background: rgba(0,0,0,.16); border-bottom: 1px solid rgba(255,255,255,.08); display: flex; gap: 9px; padding: 11px 12px; }
 .arkona-wordmark { color: #67c1f5; font-size: 11px; font-weight: 700; letter-spacing: .08em; }
 .arkona-heading-label { color: #c7d5e0; font-size: 12px; }
-.arkona-header-links { display: inline-block; line-height: normal; position: relative; vertical-align: top; white-space: nowrap; }
-.arkona-header-primary { display: inline; }
-.arkona-header-link { text-decoration: none; vertical-align: top; }
-.arkona-header-link > span { box-sizing: border-box; min-width: 36px; text-align: center; white-space: nowrap; }
-.arkona-header-link .ico16 { display: inline-block; margin: 0 !important; max-height: 22px; max-width: 22px; vertical-align: middle; }
+.arkona-header-links { align-items: center; display: inline-flex; line-height: normal; position: relative; vertical-align: top; white-space: nowrap; }
+.arkona-header-primary { align-items: center; display: inline-flex; }
+.arkona-header-link,.arkona-header-more { display: inline-block; flex: none; text-decoration: none; vertical-align: top; }
+.arkona-header-link > span,.arkona-header-more > span { align-items: center; box-sizing: border-box; display: flex !important; height: 30px; justify-content: center; line-height: 30px; padding: 0 !important; width: 36px; }
+.arkona-header-link .ico16 { display: block; flex: none; height: 20px !important; margin: 0 !important; max-height: none; max-width: none; object-fit: contain; width: 20px !important; }
 .arkona-icon-fallback { color: #fff; font-size: 10px; font-weight: 700; }
-.arkona-header-more { cursor: pointer; text-decoration: none; vertical-align: top; }
-.arkona-header-more > span { box-sizing: border-box; min-width: 36px; text-align: center; transform: rotate(0deg); transition: transform 160ms cubic-bezier(.23,1,.32,1); }
-.arkona-header-overflow { align-items: center; background: rgba(27,40,56,.97); box-shadow: 0 8px 20px rgba(0,0,0,.45); display: inline-flex; opacity: 0; padding: 5px 2px 2px 5px; pointer-events: none; position: absolute; right: 0; top: calc(100% + 3px); transform: translateY(-4px) scale(.97); transform-origin: top right; transition: opacity 180ms cubic-bezier(.23,1,.32,1),transform 180ms cubic-bezier(.23,1,.32,1),visibility 0s linear 180ms; visibility: hidden; white-space: nowrap; z-index: 1000; }
+.arkona-header-more { cursor: pointer; }
+.arkona-header-more > span { transform: rotate(0deg); transition: transform 160ms cubic-bezier(.23,1,.32,1); }
+.arkona-header-overflow { background: rgba(27,40,56,.97); box-shadow: 0 8px 20px rgba(0,0,0,.45); display: grid; gap: 4px; grid-template-columns: repeat(var(--arkona-columns, 6), 36px); opacity: 0; padding: 5px; pointer-events: none; position: absolute; right: 0; top: calc(100% + 3px); transform: translateY(-4px) scale(.97); transform-origin: top right; transition: opacity 180ms cubic-bezier(.23,1,.32,1),transform 180ms cubic-bezier(.23,1,.32,1),visibility 0s linear 180ms; visibility: hidden; white-space: nowrap; z-index: 1000; }
 .arkona-header-links.arkona-expanded .arkona-header-more > span { transform: rotate(45deg); }
 .arkona-header-links.arkona-expanded .arkona-header-overflow { opacity: 1; pointer-events: auto; transform: translateY(0) scale(1); transition-delay: 0s; visibility: visible; }
 @media (prefers-reduced-motion: reduce) {

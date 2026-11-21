@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { copyForLanguage, interpolate, steamLanguageCodes } from "./localization";
+import { copyForLanguage, interpolate, languageKey, steamLanguageCodes } from "./localization";
 
 describe("Steam localization", () => {
   test("provides complete copy for every Steam language code", () => {
@@ -15,6 +15,18 @@ describe("Steam localization", () => {
     expect(copyForLanguage("pt-BR").password).toBe("Senha");
     expect(copyForLanguage("zh-HK").copy).toBe("複製");
     expect(copyForLanguage("unknown").download).toBe("Download");
+  });
+
+  test("maps Steam names and browser locales to a language key", () => {
+    expect(languageKey("french")).toBe("fr");
+    expect(languageKey("fr-FR")).toBe("fr");
+    expect(languageKey("es-MX")).toBe("es-419");
+    expect(languageKey("es-ES")).toBe("es");
+    expect(languageKey("nb-NO")).toBe("no");
+    expect(languageKey("zh-Hant-TW")).toBe("zh-TW");
+    expect(languageKey("")).toBeNull();
+    expect(languageKey(undefined)).toBeNull();
+    expect(languageKey("xx-YY")).toBeNull();
   });
 
   test("interpolates multipart labels", () => {

@@ -81,16 +81,46 @@ const aliases: Record<string, keyof typeof copies> = {
   spanish: "es", latam: "es-419", swedish: "sv", thai: "th", turkish: "tr", ukrainian: "uk", vietnamese: "vi",
 };
 
-export function copyForLanguage(value?: string): Copy {
-  const normalized = (value || "en").trim().replaceAll("_", "-").toLowerCase();
+export type LanguageKey = keyof typeof copies;
+
+/** Maps a Steam language name ("french") or a locale ("fr-FR", "pt-BR", "es-MX") to a supported key, or null. */
+export function languageKey(value?: unknown): LanguageKey | null {
+  if (typeof value !== "string") return null;
+  const normalized = value.trim().replaceAll("_", "-").toLowerCase();
+  if (!normalized) return null;
   const alias = aliases[normalized];
-  if (alias) return copies[alias];
-  if (normalized === "zh" || normalized.startsWith("zh-cn") || normalized.startsWith("zh-sg")) return copies["zh-CN"];
-  if (normalized.startsWith("zh-tw") || normalized.startsWith("zh-hk") || normalized.startsWith("zh-mo")) return copies["zh-TW"];
-  if (normalized.startsWith("pt-br")) return copies["pt-BR"];
-  if (normalized.startsWith("es-419")) return copies["es-419"];
-  const base = normalized.split("-")[0] as keyof typeof copies;
-  return copies[base] ?? en;
+  if (alias) return alias;
+  if (normalized === "zh" || normalized.startsWith("zh-cn") || normalized.startsWith("zh-sg") || normalized.startsWith("zh-hans")) return "zh-CN";
+  if (normalized.startsWith("zh-tw") || normalized.startsWith("zh-hk") || normalized.startsWith("zh-mo") || normalized.startsWith("zh-hant")) return "zh-TW";
+  if (normalized.startsWith("pt-br")) return "pt-BR";
+  if (normalized.startsWith("es-") && normalized !== "es-es") return "es-419";
+  const base = normalized.split("-")[0];
+  if (base === "nb" || base === "nn") return "no";
+  return base in copies ? (base as LanguageKey) : null;
+}
+
+/**
+ * Steam's language, most reliable source first: the store's Steam_Language cookie,
+ * the page language, then the browser locales. Falls back to English.
+ */
+export function detectLanguage(): LanguageKey {
+  const candidates: unknown[] = [];
+  try {
+    const match = document.cookie.match(/(?:^|;\s*)Steam_Language=([^;]+)/);
+    if (match) candidates.push(decodeURIComponent(match[1]));
+  } catch {}
+  try { candidates.push(document.documentElement.lang); } catch {}
+  try { candidates.push(...(navigator.languages ?? []), navigator.language); } catch {}
+  for (const candidate of candidates) {
+    const key = languageKey(candidate);
+    if (key) return key;
+  }
+  return "en";
+}
+
+export function copyForLanguage(value?: string): Copy {
+  const key = languageKey(value);
+  return key ? copies[key] : en;
 }
 
 export function interpolate(template: string, values: Record<string, string | number>): string {
